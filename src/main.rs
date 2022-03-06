@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .route("/index.html", hello::index::route())
             .route("/assets/{filename:.*}", hello::assets::route())
             .route("/", hello::hello_world::route())
-            .route("/visit", hello::hello_name::route())
+            .route("/visit/{name_args}", hello::hello_name::route())
             .route("/count", try_state::count::route())
             .service(fs::Files::new("/", "./static/assets").show_files_listing())
     })
