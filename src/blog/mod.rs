@@ -1,8 +1,8 @@
-use actix::{io, MailboxError};
+use actix::MailboxError;
 use actix_web::{
     error, get, post,
-    web::{self, Data, Json},
-    HttpResponse, Responder, Route,
+    web::{Data, Json},
+    HttpResponse, Responder,
 };
 
 use derive_more::{Display, Error};
@@ -47,7 +47,7 @@ pub async fn get_posts(state: Data<AppState>) -> impl Responder {
         error::ErrorInternalServerError::<MailboxError>(e)
     }) {
         Ok(Ok(article)) => HttpResponse::Ok().json(article),
-        e => HttpResponse::InternalServerError().json("get error {e}"),
+        _e => HttpResponse::InternalServerError().json("get error {e}"),
     }
 }
 

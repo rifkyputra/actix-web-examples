@@ -5,5 +5,5 @@ pub fn route() -> Route {
 }
 
 async fn index() -> String {
-    format!("Hello, World!")
+    format!("Hello, From Actix!")
 }

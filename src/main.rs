@@ -10,6 +10,7 @@ use actix_files as fs;
 
 use actix_web::{middleware::Logger, App, HttpServer};
 use blog::blog_actor::BlogActor;
+use env_logger::Env;
 use log::info;
 // use diesel_migrations::{run_migrations, run_pending_migrations};
 
@@ -22,9 +23,24 @@ mod try_state;
 #[rustfmt::skip]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::init();
+    let env = Env::default()
+        .filter_or("MY_LOG_LEVEL", "debug")
+        .write_style_or("MY_LOG_STYLE", "always");
 
-    let db_url = env::var("DATABASE_URL").expect("Error");
+    env_logger::init_from_env(env);
+
+    let db_url = env::var("DATABASE_URL").expect("Error No DATABASE_URL specified");
+    
+    let app_url: String = match env::var("APP_URL") {
+        Ok(val) => val,
+        Err(_) => String::from("127.0.0.1"),
+    };
+
+    let app_port: u16 = match env::var("APP_PORT") {
+        Ok(val) => val.parse::<u16>().unwrap(),
+        Err(_) => 8090,
+    };
+
     let pool = db::get_pool(&db_url);
     let db_addr = SyncArbiter::start(5, move || BlogActor(pool.clone()));
 
@@ -32,7 +48,7 @@ async fn main() -> std::io::Result<()> {
     let visit_state = hello::hello_name::VisitBoard::init_state();
     let db = blog::models::AppState::init_state(db_addr.clone());
 
-    info!("Server Starting");
+    info!("Server Starting on {app_url} port {app_port}");
 
     // run_pending_migrations(&db_url);
 
@@ -51,7 +67,7 @@ async fn main() -> std::io::Result<()> {
             .service(blog::get_posts)
             .service(fs::Files::new("/", "./static/assets").show_files_listing())
     })
-    .bind(("127.0.0.1", 8090))?
+    .bind((app_url, app_port))?
     .run()
     .await
 }

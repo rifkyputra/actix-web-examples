@@ -12,7 +12,9 @@ services:
     depends_on:
       - "postgres"
     environment:
-      - PG_URL=postgres://docker:docker@postgres:5432/docker
+      - DATABASE_URL=postgres://docker:docker@postgres:5432/docker
+      - APP_PORT=80
+      - APP_URL=127.0.0.1
     networks:
       - actix_api
     tty: true
@@ -30,7 +32,7 @@ services:
     networks:
       - actix_api
     ports:
-      - "5432:5432"
+      - "5433:5433"
 
 networks:
   actix_api:
